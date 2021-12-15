@@ -15,9 +15,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.amsidh.mvc.service.FileService;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.UUID;
 
 @Service
 public class FileServiceImpl implements FileService {
@@ -39,6 +42,19 @@ public class FileServiceImpl implements FileService {
             e.printStackTrace();
             return new ResponseEntity("Failed to upload the file", HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @Override
+    public ResponseEntity putFile(String bucketName, MultipartFile multipartFile) {
+        try {
+            String objectName = System.currentTimeMillis() + "-" + UUID.nameUUIDFromBytes(multipartFile.getBytes()) + multipartFile.getOriginalFilename();
+            ObjectWriteResponse objectWriteResponse = minioService.putObject(bucketName, objectName, multipartFile.getInputStream(), multipartFile.getContentType());
+            return new ResponseEntity("File put successfully & file name " + objectWriteResponse.object(), HttpStatus.OK);
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return new ResponseEntity("Failed to put the file", HttpStatus.BAD_REQUEST);
+        }
+
     }
 
     @Override
