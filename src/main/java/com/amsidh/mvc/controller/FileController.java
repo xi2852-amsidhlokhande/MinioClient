@@ -14,6 +14,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @RequiredArgsConstructor
 @RestController
@@ -22,9 +23,9 @@ public class FileController {
 
     private final FileService fileService;
     private final String UPLOAD_FOLDER = "C:/Users/amsid/temp";
-
+    private AtomicInteger atomicInteger = new AtomicInteger(0);
     @PostMapping("/uploadFile")
-    public ResponseEntity uploadFile(@RequestParam String bucketName, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity uploadFile(@RequestParam String bucketName, @RequestParam("file") MultipartFile file) throws Exception {
         log.debug("Called uploadFile method of FileController");
         return fileService.uploadFile(bucketName, file);
         /*saveFile(file);
@@ -32,25 +33,29 @@ public class FileController {
     }
 
     @PostMapping("/putFile")
-    public ResponseEntity putFile(@RequestParam String bucketName, @RequestParam("file") MultipartFile multipartFile) {
+    public ResponseEntity putFile(@RequestParam String bucketName, @RequestParam("file") MultipartFile multipartFile) throws Exception {
+       log.info("\n\n-------------");
+        log.info("Record Number :"+ atomicInteger.incrementAndGet());
         log.debug("Called uploadFile method of FileController");
         return fileService.putFile(bucketName, multipartFile);
     }
 
     @GetMapping("/downloadFile")
-    public ResponseEntity downloadFile(@RequestParam String bucketName, @RequestParam String fileName) {
+    public ResponseEntity downloadFile(@RequestParam String bucketName, @RequestParam String fileName) throws Exception {
         log.debug("Called downloadFile method of FileController");
         return fileService.downloadFile(bucketName, fileName);
     }
 
-    private void saveFile(MultipartFile multipartFile) {
-        try {
-            byte[] bytes = multipartFile.getBytes();
-            String data = new String(bytes);
-            Path path = Paths.get(UPLOAD_FOLDER + File.separator + System.currentTimeMillis() + "-" + multipartFile.getOriginalFilename() + File.separator);
-            Files.write(path, bytes);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    @GetMapping("/fileCount")
+    public ResponseEntity bucketFileCount(@RequestParam String bucketName) throws Exception {
+        log.debug("Called downloadFile method of FileController");
+        return fileService.totalFilesInBucket(bucketName);
+    }
+
+    private void saveFile(MultipartFile multipartFile) throws Exception {
+        byte[] bytes = multipartFile.getBytes();
+        String data = new String(bytes);
+        Path path = Paths.get(UPLOAD_FOLDER + File.separator + System.currentTimeMillis() + "-" + multipartFile.getOriginalFilename() + File.separator);
+        Files.write(path, bytes);
     }
 }

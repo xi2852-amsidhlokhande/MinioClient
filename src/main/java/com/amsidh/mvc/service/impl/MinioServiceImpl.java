@@ -2,16 +2,14 @@ package com.amsidh.mvc.service.impl;
 
 import com.amsidh.mvc.service.MinioService;
 import io.minio.*;
-import jdk.jfr.ContentType;
+import io.minio.messages.Item;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.beans.Statement;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.security.Policy;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @RequiredArgsConstructor
 @Service
@@ -19,11 +17,16 @@ import java.security.Policy;
 public class MinioServiceImpl implements MinioService {
 
     private final MinioClient minioClient;
+    private AtomicInteger atomicInteger = new AtomicInteger(0);
     @Override
     public void createBucket(String bucketName) throws Exception {
         log.debug("Called createBucket method of MinioServiceImpl with BucketName {}", bucketName);
-        if (!isBucketExists(bucketName)) minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
+        MakeBucketArgs makeBucketArgs = MakeBucketArgs.builder()
+                .bucket(bucketName)
+                .build();
+        if (!isBucketExists(bucketName)) minioClient.makeBucket(makeBucketArgs);
     }
+
     @Override
     public boolean isBucketExists(String bucketName) throws Exception {
         log.debug("Called isBucketExists method of MinioServiceImpl with BucketName {}", bucketName);
@@ -45,10 +48,11 @@ public class MinioServiceImpl implements MinioService {
     public ObjectWriteResponse putObject(String bucketName, String objectName, InputStream inputStream, String contentType) throws Exception {
         createBucket(bucketName);
         PutObjectArgs putObjectArgs = PutObjectArgs.builder().bucket(bucketName).object(objectName).stream(
-                        inputStream, -1, 10485760)
+                inputStream, -1, 10485760)
                 .contentType(contentType)
                 .build();
         log.info("Called putObject method of MinioServiceImpl {}", putObjectArgs.object());
+        log.info("Upload Number :"+ atomicInteger.incrementAndGet());
         return minioClient.putObject(putObjectArgs);
     }
 
@@ -58,5 +62,12 @@ public class MinioServiceImpl implements MinioService {
         log.debug("Called getObject method of MinioServiceImpl with BucketName {} and FileName {}", bucketName, fileName);
         GetObjectResponse objectResponse = isBucketExists(bucketName) ? minioClient.getObject(getObjectArgs) : null;
         return objectResponse;
+    }
+
+    @Override
+    public Iterable<Result<Item>> objectsInBucket(String bucketName) throws Exception {
+        ListObjectsArgs listObjectsArgs = ListObjectsArgs.builder().bucket(bucketName).build();
+        Iterable<Result<Item>> resultIterable = minioClient.listObjects(listObjectsArgs);
+        return resultIterable;
     }
 }
