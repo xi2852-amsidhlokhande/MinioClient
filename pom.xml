@@ -18,7 +18,6 @@
     <properties>
         <java.version>1.8</java.version>
         <minio.version>8.3.4</minio.version>
-        <okhttp.version>5.0.0-aplha.3</okhttp.version>
     </properties>
     <dependencies>
         <dependency>
@@ -56,7 +55,7 @@
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
-            <version>5.0.0-alpha.3</version>
+            <version>4.2.1</version>
         </dependency>
         <!-- Required for Multipart file upload and download -->
         <dependency>
