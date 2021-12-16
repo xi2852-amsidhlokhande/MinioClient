@@ -21,7 +21,11 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static com.amsidh.mvc.common.Constant.MINIO_CROPPED_IMAGE_BUCKET_NAME;
+import static com.amsidh.mvc.common.Constant.MINIO_INPUT_IMAGE_BUCKET_NAME;
 
 @EnableBinding(Source.class)
 @RequiredArgsConstructor
@@ -36,28 +40,39 @@ public class FileController {
     private AtomicInteger atomicInteger = new AtomicInteger(0);
 
     @PostMapping("/uploadFile")
-    public ResponseEntity uploadFile(@RequestParam String bucketName, @RequestParam("file") MultipartFile file) throws Exception {
+    public ResponseEntity uploadFile(@RequestParam("file") MultipartFile file) throws Exception {
         log.debug("Called uploadFile method of FileController");
-        return fileService.uploadFile(bucketName, file);
+        return fileService.uploadFile(MINIO_INPUT_IMAGE_BUCKET_NAME, file);
         /*saveFile(file);
         return new ResponseEntity("File uploaded Successfully & file name :" + file.getOriginalFilename(), HttpStatus.OK);*/
     }
 
     @PostMapping("/putFile")
-    public ResponseEntity putFile(@RequestParam String bucketName, @RequestParam("file") MultipartFile multipartFile) throws Exception {
-       log.info("\n\n-------------");
-        log.info("Record Number :"+ atomicInteger.incrementAndGet());
+    public ResponseEntity<BlockReadyMessage> putFile(@RequestParam("file") MultipartFile multipartFile) throws Exception {
+        log.info("\n\n-------------");
+        log.info("Record Number :" + atomicInteger.incrementAndGet());
         log.debug("Called uploadFile method of FileController");
-        ObjectWriteResponse objectWriteResponse = fileService.putFile(bucketName, multipartFile);
-        BlockReadyMessage blockReadyMessage = BlockReadyMessage.builder().fileMinioPath(objectWriteResponse.object()).build();
+        ObjectWriteResponse objectWriteResponse = fileService.putFile(MINIO_INPUT_IMAGE_BUCKET_NAME, multipartFile);
+        BlockReadyMessage blockReadyMessage = BlockReadyMessage.builder()
+                .uuid(UUID.nameUUIDFromBytes(multipartFile.getBytes()))
+                .bucketName(objectWriteResponse.bucket())
+                .fileName(objectWriteResponse.object())
+                .contentType(multipartFile.getContentType())
+                .build();
         output.send(MessageBuilder.withPayload(blockReadyMessage).build());
-        return  new ResponseEntity("File put successfully & file name " + objectWriteResponse.object(), HttpStatus.OK);
+        return new ResponseEntity(blockReadyMessage, HttpStatus.ACCEPTED);
     }
 
     @GetMapping("/downloadFile")
-    public ResponseEntity downloadFile(@RequestParam String bucketName, @RequestParam String fileName) throws Exception {
+    public ResponseEntity downloadFile(@RequestParam String fileName) throws Exception {
         log.debug("Called downloadFile method of FileController");
-        return fileService.downloadFile(bucketName, fileName);
+        return fileService.downloadFile(MINIO_INPUT_IMAGE_BUCKET_NAME, fileName);
+    }
+
+    @GetMapping("/downloadCroppedFile")
+    public ResponseEntity downloadCroppedFile(@RequestParam String fileName) throws Exception {
+        log.debug("Called downloadFile method of FileController");
+        return fileService.downloadFile(MINIO_CROPPED_IMAGE_BUCKET_NAME, fileName);
     }
 
     @GetMapping("/fileCount")
