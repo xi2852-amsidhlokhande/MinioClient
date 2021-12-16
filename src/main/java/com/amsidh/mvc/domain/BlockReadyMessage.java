@@ -3,6 +3,7 @@ package com.amsidh.mvc.domain;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -11,5 +12,8 @@ import java.io.Serializable;
 @EqualsAndHashCode
 @ToString
 public class BlockReadyMessage implements Serializable {
-    private String fileMinioPath;
+    private UUID uuid;
+    private String bucketName;
+    private String fileName;
+    private String contentType;
 }
