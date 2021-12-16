@@ -41,10 +41,10 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public ResponseEntity putFile(String bucketName, MultipartFile multipartFile) throws Exception {
+    public ObjectWriteResponse putFile(String bucketName, MultipartFile multipartFile) throws Exception {
         String objectName = System.currentTimeMillis() + "-" + UUID.nameUUIDFromBytes(multipartFile.getBytes()) + multipartFile.getOriginalFilename();
         ObjectWriteResponse objectWriteResponse = minioService.putObject(bucketName, objectName, multipartFile.getInputStream(), multipartFile.getContentType());
-        return new ResponseEntity("File put successfully & file name " + objectWriteResponse.object(), HttpStatus.OK);
+        return objectWriteResponse;
     }
 
     @Override

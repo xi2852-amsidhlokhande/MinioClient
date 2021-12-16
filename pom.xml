@@ -19,6 +19,9 @@
         <java.version>1.8</java.version>
         <minio.version>8.3.4</minio.version>
         <okhttp.version>5.0.0-aplha.3</okhttp.version>
+        <spring-cloud.version>Greenwich.SR4</spring-cloud.version>
+        <spring-cloud-stream.version>Horsham.SR1</spring-cloud-stream.version>
+
     </properties>
     <dependencies>
         <dependency>
@@ -64,8 +67,51 @@
             <artifactId>commons-io</artifactId>
             <version>2.11.0</version>
         </dependency>
-    </dependencies>
 
+        <!-- Messaging dependencies-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-stream</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-stream-binder-kafka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-stream</artifactId>
+            <scope>test</scope>
+            <classifier>test-binder</classifier>
+            <type>test-jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-stream-dependencies</artifactId>
+                <version>${spring-cloud-stream.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <build>
         <plugins>
             <plugin>

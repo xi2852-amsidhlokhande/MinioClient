@@ -1,0 +1,32 @@
+server:
+  connection-timeout: 5000
+  port: 8989
+
+spring:
+  cloud:
+    stream:
+      bindings:
+        output:
+          destination: spring-topic
+          producer:
+            autoStartup: true
+        input:
+          destination: spring-topic
+          consumer:
+            autoStartup: true
+            maxAttempts: 3
+            defaultRetryable: true
+
+
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 2KB
+      max-file-size: 5MB
+      max-request-size: 7MB
+
+minio:
+  url: http://127.0.0.1:9000
+  accessKey: minio
+  secretKey: minio123
+
