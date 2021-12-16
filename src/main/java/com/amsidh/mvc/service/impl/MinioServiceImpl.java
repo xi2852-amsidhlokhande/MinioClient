@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicInteger;
 
+
 @RequiredArgsConstructor
 @Service
 @Slf4j
@@ -18,6 +19,7 @@ public class MinioServiceImpl implements MinioService {
 
     private final MinioClient minioClient;
     private AtomicInteger atomicInteger = new AtomicInteger(0);
+
     @Override
     public void createBucket(String bucketName) throws Exception {
         log.debug("Called createBucket method of MinioServiceImpl with BucketName {}", bucketName);
@@ -51,9 +53,11 @@ public class MinioServiceImpl implements MinioService {
                 inputStream, -1, 10485760)
                 .contentType(contentType)
                 .build();
+
         log.info("Called putObject method of MinioServiceImpl {}", putObjectArgs.object());
-        log.info("Upload Number :"+ atomicInteger.incrementAndGet());
+        log.info("Upload Number :" + atomicInteger.incrementAndGet());
         return minioClient.putObject(putObjectArgs);
+
     }
 
     @Override
